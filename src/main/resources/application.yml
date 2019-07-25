@@ -1,3 +1,20 @@
 server:
   port: 8000
 
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://192.168.142.128:3306/tutorial?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
+    username: root
+    password: Qwer1234!
+    hikari:
+      connection-test-query: select 1
+
+mybatis:
+  mapper-locations: classpath:mybatis-mappers/*.xml
+
+swagger2:
+  title: tutorial
+  description: my own tutorial
+  contact-name: shenghui
+  contact-email: wushenghui_195481@baosight.com
