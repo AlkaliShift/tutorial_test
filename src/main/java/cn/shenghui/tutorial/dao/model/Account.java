@@ -6,27 +6,27 @@ import lombok.Data;
  * @version 1.0
  * @Author: shenghui
  * @Date: 2019/7/25 22:24
- * 账户类
+ * Account
  */
 @Data
 public class Account {
     /**
-     * 账户ID
+     * account id
      */
     String accountId;
 
     /**
-     * 账户名称
+     * account name
      */
     String accountName;
 
     /**
-     * 账户密码
+     * password
      */
     String payPassword;
 
     /**
-     * 账户金额
+     * balance
      */
-    long money;
+    long balance;
 }
