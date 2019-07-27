@@ -35,4 +35,8 @@ public class AccountService {
         accountMapper.createAccount(account);
         return accountId;
     }
+
+    public Account getAccountInfo(String accountId){
+        return accountMapper.getAccountInfo(accountId);
+    }
 }

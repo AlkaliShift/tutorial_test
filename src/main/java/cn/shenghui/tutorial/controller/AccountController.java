@@ -2,16 +2,16 @@ package cn.shenghui.tutorial.controller;
 
 import cn.shenghui.tutorial.dao.model.Account;
 import cn.shenghui.tutorial.rest.request.CreateAccountRequest;
+import cn.shenghui.tutorial.rest.response.AccountResponse;
 import cn.shenghui.tutorial.rest.response.CreateAccountResponse;
 import cn.shenghui.tutorial.service.AccountService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @version 1.0
@@ -44,10 +44,32 @@ public class AccountController {
             account.setAccountName(createAccountRequest.getAccountName());
             account.setPayPassword(createAccountRequest.getAccountPassword());
             String accountId = accountService.createAccount(account);
-
             response.setAccountId(accountId);
             response.setStatusCode(1);
             return response;
+        }
+    }
+
+    @ApiOperation(value = "get account information",
+            notes = "statusCode = 1, success and return account information; statusCode = 0, failed")
+    @GetMapping("/getAccountInfo")
+    public AccountResponse getAccountInfo(@RequestParam(name = "accountId") String accountId){
+        AccountResponse response = new AccountResponse();
+        if (accountId.isEmpty()){
+            response.setStatusInfo(0, "Account ID is null.");
+            return response;
+        }else{
+            Account account = accountService.getAccountInfo(accountId);
+            if(ObjectUtils.isEmpty(account)){
+                response.setStatusInfo(2, "ID does not exist.");
+                return response;
+            }else{
+                response.setAccountId(accountId);
+                response.setAccountName(account.getAccountName());
+                response.setBalance(account.getBalance());
+                response.setStatusCode(1);
+                return response;
+            }
         }
     }
 }

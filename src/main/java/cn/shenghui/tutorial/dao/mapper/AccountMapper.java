@@ -16,4 +16,11 @@ public interface AccountMapper {
      * @param account
      */
     void createAccount(Account account);
+
+    /**
+     * get account information
+     * @param accountId
+     * @return
+     */
+    Account getAccountInfo(String accountId);
 }

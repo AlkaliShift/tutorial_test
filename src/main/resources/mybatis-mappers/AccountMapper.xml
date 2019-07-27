@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.shenghui.tutorial.dao.mapper.AccountMapper">
+
+    <resultMap id="account" type="cn.shenghui.tutorial.dao.model.Account">
+        <id column="account_id" jdbcType="VARCHAR" property="accountId"/>
+        <result column="account_name" jdbcType="VARCHAR" property="accountName"/>
+        <result column="money" jdbcType="BIGINT" property="balance"/>
+    </resultMap>
     <insert id="createAccount" parameterType="cn.shenghui.tutorial.dao.model.Account">
         insert into account
         values (#{accountId,jdbcType=VARCHAR},
@@ -8,4 +14,9 @@
                 #{payPassword,jdbcType=VARCHAR},
                 #{balance,jdbcType=BIGINT})
     </insert>
+
+    <select id="getAccountInfo" parameterType="java.lang.String" resultMap="account">
+        select account_id, account_name, money from account
+        where account_id = #{accountId,jdbcType=VARCHAR}
+    </select>
 </mapper>
