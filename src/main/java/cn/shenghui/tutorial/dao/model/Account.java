@@ -4,8 +4,8 @@ import lombok.Data;
 
 /**
  * @version 1.0
- * @Author: shenghui
- * @Date: 2019/7/25 22:24
+ * @author shenghui
+ * @since 2019/7/25 22:24
  * Account
  */
 @Data

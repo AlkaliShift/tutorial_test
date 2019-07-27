@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.shenghui.tutorial.dao.mapper.AccountMapper">
+    <insert id="createAccount" parameterType="cn.shenghui.tutorial.dao.model.Account">
+        insert into account
+        values (#{accountId,jdbcType=VARCHAR},
+                #{accountName,jdbcType=VARCHAR},
+                #{payPassword,jdbcType=VARCHAR},
+                #{balance,jdbcType=BIGINT})
+    </insert>
+</mapper>

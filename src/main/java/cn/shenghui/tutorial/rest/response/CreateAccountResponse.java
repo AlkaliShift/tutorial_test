@@ -7,8 +7,8 @@ import lombok.Data;
 
 /**
  * @version 1.0
- * @Author: shenghui
- * @Date: {2019/7/26} {14:18}
+ * @author shenghui
+ * @since 2019/7/26 14:18
  */
 @Data
 @ApiModel(value = "account basic information")
