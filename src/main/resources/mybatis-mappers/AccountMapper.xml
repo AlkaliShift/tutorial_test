@@ -7,6 +7,7 @@
         <result column="account_name" jdbcType="VARCHAR" property="accountName"/>
         <result column="money" jdbcType="BIGINT" property="balance"/>
     </resultMap>
+
     <insert id="createAccount" parameterType="cn.shenghui.tutorial.dao.model.Account">
         insert into account
         values (#{accountId,jdbcType=VARCHAR},
@@ -19,4 +20,10 @@
         select account_id, account_name, money from account
         where account_id = #{accountId,jdbcType=VARCHAR}
     </select>
+
+    <update id="updateBalance">
+        update account
+        set money = money - #{amount, jdbcType=BIGINT}
+        where account_id = #{accountId, jdbcType=VARCHAR}
+    </update>
 </mapper>

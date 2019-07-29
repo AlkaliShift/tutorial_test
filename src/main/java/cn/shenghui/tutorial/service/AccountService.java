@@ -36,7 +36,22 @@ public class AccountService {
         return accountId;
     }
 
+    /**
+     * get account information
+     * @param accountId
+     * @return
+     */
     public Account getAccountInfo(String accountId){
         return accountMapper.getAccountInfo(accountId);
+    }
+
+    /**
+     * pay
+     * @param accountId
+     * @param amount
+     * @return
+     */
+    public void pay(String accountId, long amount){
+        accountMapper.updateBalance(accountId, amount);
     }
 }
