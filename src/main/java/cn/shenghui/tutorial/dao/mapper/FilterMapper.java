@@ -1,8 +1,7 @@
 package cn.shenghui.tutorial.dao.mapper;
 
-import org.apache.ibatis.annotations.Param;
+import cn.shenghui.tutorial.dao.model.Good;
 import org.mapstruct.Mapper;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author shenghui
@@ -12,9 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Mapper
 public interface FilterMapper {
     /**
-     * filter mapper
-     * @param temp
+     * goods
+     * @param good
      */
-
-    void filter(@Param("temp")String[] temp);
+    void filter(Good good);
 }

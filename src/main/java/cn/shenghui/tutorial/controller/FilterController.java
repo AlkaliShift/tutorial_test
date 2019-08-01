@@ -8,11 +8,12 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.io.*;
-import java.util.ArrayList;
 
 /**
  * @author shenghui
@@ -25,54 +26,61 @@ public class FilterController {
     private FilterService filterService;
 
     @Autowired
-    public void setFilterService(FilterService filterService){
+    public void setFilterService(FilterService filterService) {
         this.filterService = filterService;
     }
 
     @ApiOperation(value = "filter sql.txt",
             notes = "statusCode = 1, success; statusCode = 0, return failed message.")
     @PostMapping("/filter")
-    public FileResponse filter(@RequestBody FileRequest fileRequest){
+    @Transactional(rollbackFor = Exception.class)
+    public FileResponse filter(@RequestBody FileRequest fileRequest) {
         FileResponse response = new FileResponse();
         String path = fileRequest.getFilePath();
         File file = new File(path);
         BufferedReader reader = null;
-        if (!file.exists()){
+        if (!file.exists()) {
             response.setStatusInfo(0, "File does not exist.");
-        }else{
-            try{
+        } else {
+            try {
                 reader = new BufferedReader(new FileReader(file));
-                String tempString = null;
+                String tempString;
                 int line = 0;
                 int wrong = 0;
-                ArrayList<String[]> temp = new ArrayList<String[]>();
+                JSONObject tempJson;
+                StringBuilder errorMessages = new StringBuilder();
+                errorMessages.append("错误信息：")
+                        .append("\r\n");
                 while ((tempString = reader.readLine()) != null) {
-                    temp.add(tempString.split(","));
                     line++;
-                }
-                String[] tempStringList;
-                JSONObject tempJson = new JSONObject();
-                String msg = "";
-                for(int i = 0; i < temp.size(); i++){
-                    tempStringList = temp.get(i);
-                    tempJson = filterService.filter(tempStringList);
-                    if((tempJson) != null){
-                        msg = msg + tempJson.getString("id") + " " + tempJson.getString("msg") + "\n\n\n";
+                    tempJson = filterService.filter(tempString);
+                    if (tempJson.length() != 0) {
+                        StringBuilder errorMessage = new StringBuilder();
+                        errorMessage.append("错误行号：")
+                                .append(line)
+                                .append(",行内容：")
+                                .append(tempJson.getString("content"))
+                                .append(",错误详情：");
+                        if(tempJson.length() > 1){
+                            errorMessage.append(tempJson.getString("msg"));
+                        }
+                        errorMessage.append("\r\n");
+                        errorMessages.append(errorMessage.toString());
                         wrong++;
                     }
                 }
                 response.setLine(line);
                 response.setWrong(wrong);
-                response.setStatusInfo(0, msg);
-            }catch (IOException e){
+                response.setStatusInfo(0, errorMessages + "");
+            } catch (IOException e) {
                 e.printStackTrace();
-            }catch (JSONException j){
-                j.getMessage();
-            }finally {
+            } catch (JSONException j) {
+            } finally {
                 if (reader != null) {
                     try {
                         reader.close();
                     } catch (IOException ioe) {
+                        ioe.printStackTrace();
                     }
                 }
             }
