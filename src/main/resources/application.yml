@@ -2,6 +2,8 @@ server:
   port: 8000
 
 spring:
+  thymeleaf:
+    cache: false
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://192.168.206.128:3306/tutorial?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false

@@ -21,9 +21,24 @@
         where account_id = #{accountId,jdbcType=VARCHAR}
     </select>
 
+    <select id="getAllAccount" resultMap="account">
+        select account_id, account_name, money from account
+    </select>
+
     <update id="updateBalance">
         update account
         set money = money - #{amount, jdbcType=BIGINT}
         where account_id = #{accountId, jdbcType=VARCHAR}
+    </update>
+
+
+    <delete id="deleteAccount" parameterType="java.lang.String">
+        delete from account where account_id=#{accountId,jdbcType=VARCHAR}
+    </delete>
+
+    <update id="updateAccount" parameterType="cn.shenghui.tutorial.dao.model.Account">
+        update account
+        set account_name = #{accountName,jdbcType=VARCHAR}, pay_password = #{payPassword,jdbcType=VARCHAR}
+        where account_id = #{accountId,jdbcType=VARCHAR}
     </update>
 </mapper>

@@ -5,6 +5,7 @@ import cn.shenghui.tutorial.dao.model.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -45,6 +46,11 @@ public class AccountService {
         return accountMapper.getAccountInfo(accountId);
     }
 
+
+    public List<Account> getAllAccount() {
+        return accountMapper.getAllAccount();
+    }
+
     /**
      * pay
      * @param accountId
@@ -53,5 +59,21 @@ public class AccountService {
      */
     public void pay(String accountId, long amount){
         accountMapper.updateBalance(accountId, amount);
+    }
+
+    /**
+     * delete account
+     * @param accountId
+     */
+    public void deleteAccount(String accountId) {
+        accountMapper.deleteAccount(accountId);
+    }
+
+    /**
+     * update account
+     * @param account
+     */
+    public void updateAccount(Account account) {
+        accountMapper.updateAccount(account);
     }
 }
