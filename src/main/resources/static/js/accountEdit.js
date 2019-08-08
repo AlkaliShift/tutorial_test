@@ -6,17 +6,8 @@ layui.use('form', function() {
     $('#save').on('click',function(){
         var account = {};
         account.accountId = $('#accountId').val();
-        if($('#accountName').val() != ""){
-            account.accountName = $('#accountName').val();
-            if($('#accountPassword').val() != ""){
-                account.accountPassword = $('#accountPassword').val();
-            }else{
-                layer.msg("密码不能为空");
-            }
-        }else{
-            layer.msg("用户名不能为空");
-        }
-
+        account.accountName = $('#accountName').val();
+        account.accountPassword = $('#accountPassword').val();
         $.ajax({
             type: 'POST',
             url: '/updateAccount',

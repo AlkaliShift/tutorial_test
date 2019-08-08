@@ -8,17 +8,21 @@ layui.use(['form', 'table', 'layer'], function () {
 
     table.render({
         elem: '#accounts'
-        , url: '/getAllAccount'
+        , url: '/getAccountInfo'
+        , where: {accountId: $("#accountId").val()}
         , response: {
             statusName: 'statusCode' //规定数据状态的字段名称，默认：code
             , statusCode: 1 //规定成功的状态码，默认：0
+            , msgName: 'msg' //规定状态信息的字段名称，默认：msg
         }
         , parseData: function (res) { //res 即为原始返回的数据
             return {
                 "statusCode": res.statusCode,
                 "count": getJsonLength(res.accounts), //解析数据长度
-                "data": res.accounts
+                "data": res.accounts,
+                "msg": res.msg
             }
+
         }
         , cols: [[
             {field: 'accountId', title: '账户ID'}
@@ -32,18 +36,22 @@ layui.use(['form', 'table', 'layer'], function () {
     });
 
 
-    function reloadTable(data) {
-        table.reload('accounts', {
-            data: data,
-            page: {
-                curr: 1 //重新从第 1 页开始
-            }
-        });
+    var active = {
+        reload: function () {
+            table.reload('accounts', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                , where: {
+                    accountId: $("#accountId").val()
+                }
+            });
+        }
     };
 
     $('#search').on('click', function () {
-        console.log("1");
-        reloadTable();
+        var type = $(this).data('type');
+        active[type] ? active[type].call(this) : '';
     });
 
     $('#reset').on('click', function () {

@@ -46,7 +46,10 @@ public class AccountService {
         return accountMapper.getAccountInfo(accountId);
     }
 
-
+    /**
+     * get all account
+     * @return
+     */
     public List<Account> getAllAccount() {
         return accountMapper.getAllAccount();
     }

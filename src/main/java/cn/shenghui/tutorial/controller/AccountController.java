@@ -18,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,7 +59,8 @@ public class AccountController {
     public ModelAndView editAccount(@RequestParam(name = "accountId") String accountId){
         ModelAndView mv = new ModelAndView();
         mv.setViewName("accountEdit");
-        mv.addObject("accountId", accountId);
+        Account account = accountService.getAccountInfo(accountId);
+        mv.addObject("account", account);
         return mv;
     }
 
@@ -75,23 +77,6 @@ public class AccountController {
         response.setAccountId(accountId);
         response.setStatusCode(1);
         return response;
-
-    }
-
-    @ApiOperation(value = "get account information",
-            notes = "statusCode = 0, failed; " +
-                    "statusCode = 1, success and return all accounts' information;")
-    @GetMapping("getAllAccount")
-    public AccountListResponse getAllAccount(){
-        AccountListResponse response = new AccountListResponse();
-        List<Account> accounts = accountService.getAllAccount();
-        if(ObjectUtils.isEmpty(accounts)) {
-            response.setStatusInfo(0, "Error.");
-        }else{
-            response.setAccountList(accounts);
-            response.setStatusCode(1);
-        }
-        return response;
     }
 
     @ApiOperation(value = "get account information",
@@ -99,18 +84,20 @@ public class AccountController {
                     "statusCode = 1, success and return account information; " +
                     "statusCode = 2, id does not exist.")
     @GetMapping("/getAccountInfo")
-    public AccountResponse getAccountInfo(@RequestParam(name = "accountId") String accountId) {
-        AccountResponse response = new AccountResponse();
+    public AccountListResponse getAccountInfo(@RequestParam(name = "accountId") String accountId) {
+        AccountListResponse response = new AccountListResponse();
         if(accountId.isEmpty()) {
-            response.setStatusInfo(0, "Account ID is null.");
+            List<Account> accounts = accountService.getAllAccount();
+            response.setAccountList(accounts);
+            response.setStatusCode(1);
         }else{
             Account account = accountService.getAccountInfo(accountId);
             if(ObjectUtils.isEmpty(account)) {
-                response.setStatusInfo(2, "ID does not exist.");
+                response.setStatusInfo(0, "ID does not exist.");
             }else{
-                response.setAccountId(accountId);
-                response.setAccountName(account.getAccountName());
-                response.setBalance(account.getBalance());
+                List<Account> accounts = new ArrayList<>();
+                accounts.add(account);
+                response.setAccountList(accounts);
                 response.setStatusCode(1);
             }
         }

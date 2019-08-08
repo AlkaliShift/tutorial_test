@@ -5,6 +5,7 @@
     <resultMap id="account" type="cn.shenghui.tutorial.dao.model.Account">
         <id column="account_id" jdbcType="VARCHAR" property="accountId"/>
         <result column="account_name" jdbcType="VARCHAR" property="accountName"/>
+        <result column="pay_password" jdbcType="VARCHAR" property="payPassword"/>
         <result column="money" jdbcType="BIGINT" property="balance"/>
     </resultMap>
 
@@ -17,12 +18,12 @@
     </insert>
 
     <select id="getAccountInfo" parameterType="java.lang.String" resultMap="account">
-        select account_id, account_name, money from account
+        select account_id, account_name,pay_password, money from account
         where account_id = #{accountId,jdbcType=VARCHAR}
     </select>
 
     <select id="getAllAccount" resultMap="account">
-        select account_id, account_name, money from account
+        select account_id, account_name,pay_password, money from account
     </select>
 
     <update id="updateBalance">
