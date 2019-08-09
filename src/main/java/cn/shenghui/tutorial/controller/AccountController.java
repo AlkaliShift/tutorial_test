@@ -12,13 +12,13 @@ import cn.shenghui.tutorial.service.AccountService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,7 +27,7 @@ import java.util.List;
  * @since 2019/7/26 14:17
  * account controller/uri
  */
-@RestController
+@Controller
 @Api(tags = "Account")
 public class AccountController {
 
@@ -39,7 +39,7 @@ public class AccountController {
     }
 
     @ApiOperation(value = "get account list")
-    @GetMapping("/list")
+    @RequestMapping("/list")
     public ModelAndView getAccountList(){
         ModelAndView mv = new ModelAndView();
         mv.setViewName("account");
@@ -47,7 +47,7 @@ public class AccountController {
     }
 
     @ApiOperation(value = "add account page")
-    @GetMapping("/add")
+    @RequestMapping("/add")
     public ModelAndView addAccount(){
         ModelAndView mv = new ModelAndView();
         mv.setViewName("accountAdd");
@@ -55,7 +55,7 @@ public class AccountController {
     }
 
     @ApiOperation(value = "edit account page")
-    @GetMapping("/edit")
+    @RequestMapping("/edit")
     public ModelAndView editAccount(@RequestParam(name = "accountId") String accountId){
         ModelAndView mv = new ModelAndView();
         mv.setViewName("accountEdit");
@@ -66,7 +66,8 @@ public class AccountController {
 
     @ApiOperation(value = "create account",
             notes = "statusCode = 1, success and return account id; statusCode = 0, failed.")
-    @PostMapping("/createAccount")
+    @RequestMapping(value = "/createAccount", method = RequestMethod.POST)
+    @ResponseBody
     @Transactional(rollbackFor = Exception.class)
     public CreateAccountResponse createAccount(@RequestBody @Validated CreateAccountRequest createAccountRequest) {
         CreateAccountResponse response = new CreateAccountResponse();
@@ -83,23 +84,16 @@ public class AccountController {
             notes = "statusCode = 0, failed; " +
                     "statusCode = 1, success and return account information; " +
                     "statusCode = 2, id does not exist.")
-    @GetMapping("/getAccountInfo")
+    @RequestMapping(value = "/getAccountInfo", method = RequestMethod.GET)
+    @ResponseBody
     public AccountListResponse getAccountInfo(@RequestParam(name = "accountId") String accountId) {
         AccountListResponse response = new AccountListResponse();
-        if(accountId.isEmpty()) {
-            List<Account> accounts = accountService.getAllAccount();
+        List<Account> accounts = accountService.searchAccountInfo(accountId);
+        if(ObjectUtils.isEmpty(accounts)) {
+            response.setStatusInfo(0, "ID does not exist.");
+        }else{
             response.setAccountList(accounts);
             response.setStatusCode(1);
-        }else{
-            Account account = accountService.getAccountInfo(accountId);
-            if(ObjectUtils.isEmpty(account)) {
-                response.setStatusInfo(0, "ID does not exist.");
-            }else{
-                List<Account> accounts = new ArrayList<>();
-                accounts.add(account);
-                response.setAccountList(accounts);
-                response.setStatusCode(1);
-            }
         }
         return response;
     }
@@ -107,7 +101,8 @@ public class AccountController {
     @ApiOperation(value = "pay", notes = "statusCode = 0, failed; " +
             "statusCode = 1, success and return balance; " +
             "statusCode = 2, id does not exist.")
-    @PostMapping("/pay")
+    @RequestMapping(value = "/pay", method = RequestMethod.POST)
+    @ResponseBody
     @Transactional(rollbackFor = Exception.class)
     public AccountResponse pay(@RequestBody PayRequest payRequest){
         AccountResponse response = new AccountResponse();
@@ -138,7 +133,8 @@ public class AccountController {
 
     @ApiOperation(value = "update account", notes = "statusCode = 0, failed; " +
             "statusCode = 1, success")
-    @PostMapping("/updateAccount")
+    @RequestMapping(value = "/updateAccount", method = RequestMethod.POST)
+    @ResponseBody
     public BasicAccountResponse updateAccount(@RequestBody @Validated UpdateAccountRequest updateAccountRequest){
         BasicAccountResponse response = new BasicAccountResponse();
         Account account = new Account();
@@ -152,7 +148,8 @@ public class AccountController {
 
     @ApiOperation(value = "delete account", notes = "statusCode = 0, failed; " +
             "statusCode = 1, success")
-    @GetMapping("/deleteAccount")
+    @RequestMapping(value = "/deleteAccount", method = RequestMethod.GET)
+    @ResponseBody
     public BasicAccountResponse deleteAccount(@RequestParam(name = "accountId") String accountId){
         BasicAccountResponse response = new BasicAccountResponse();
         accountService.deleteAccount(accountId);

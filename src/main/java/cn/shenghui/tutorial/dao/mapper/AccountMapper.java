@@ -28,10 +28,11 @@ public interface AccountMapper {
     Account getAccountInfo(String accountId);
 
     /**
-     * get all accounts
+     * fuzzy search
+     * @param accountId
      * @return
      */
-    List<Account> getAllAccount();
+    List<Account> searchAccountInfo(@Param("accountId") String accountId);
 
     /**
      * update balance

@@ -50,8 +50,8 @@ public class AccountService {
      * get all account
      * @return
      */
-    public List<Account> getAllAccount() {
-        return accountMapper.getAllAccount();
+    public List<Account> searchAccountInfo(String accountId) {
+        return accountMapper.searchAccountInfo(accountId);
     }
 
     /**
