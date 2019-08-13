@@ -46,11 +46,18 @@ public interface AccountMapper {
      * delete account
      * @param accountId
      */
-    void deleteAccount(String accountId);
+    void deleteAccount(@Param("accountId")String accountId);
 
     /**
      * update account
      * @param account
      */
     void updateAccount(Account account);
+
+    /**
+     * update account path
+     * @param accountId
+     * @param filename
+     */
+    void updateAccountPath(@Param("accountId")String accountId, @Param("filename")String filename);
 }

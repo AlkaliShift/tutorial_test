@@ -29,4 +29,9 @@ public class Account {
      * balance
      */
     long balance;
+
+    /**
+     * path
+     */
+    String path;
 }

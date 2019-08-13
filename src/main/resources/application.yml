@@ -12,6 +12,9 @@ spring:
     hikari:
       connection-test-query: select 1
 
+pagehelper:
+  helper-dialect: mysql
+
 mybatis:
   mapper-locations: classpath:mybatis-mappers/*.xml
 
@@ -20,3 +23,7 @@ swagger2:
   description: my own tutorial
   contact-name: shenghui
   contact-email: wushenghui_195481@baosight.com
+
+#logging:
+#  level:
+#    cn.shenghui.tutorial.dao.mapper: debug

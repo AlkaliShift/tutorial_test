@@ -18,7 +18,7 @@ layui.use(['form', 'table', 'layer'], function () {
         , parseData: function (res) { //res 即为原始返回的数据
             return {
                 "statusCode": res.statusCode,
-                "count": getJsonLength(res.accounts), //解析数据长度
+                "count": res.total, //解析数据长度
                 "data": res.accounts,
                 "msg": res.msg
             }
@@ -100,15 +100,18 @@ layui.use(['form', 'table', 'layer'], function () {
                     });
                     layer.close(index);
                 });
+        } else if (layEvent === 'up') {
+            layer.open({
+                type: 2,
+                content: '/upload?accountId=' + accountId,
+                area: ['400px', '260px'],
+                closeBtn: 2,
+                shadeClose: true,
+                title: '上传图片'
+            });
+        } else if (layEvent === 'down') {
+            var action = '/downloadImage?accountId=' + accountId;
+            window.open(action);
         }
     });
-
-
-    function getJsonLength(json) {
-        var jsonLength = 0;
-        for (var i in json) {
-            jsonLength++;
-        }
-        return jsonLength;
-    }
 });

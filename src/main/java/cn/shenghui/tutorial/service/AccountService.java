@@ -2,6 +2,8 @@ package cn.shenghui.tutorial.service;
 
 import cn.shenghui.tutorial.dao.mapper.AccountMapper;
 import cn.shenghui.tutorial.dao.model.Account;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,10 +49,20 @@ public class AccountService {
     }
 
     /**
-     * get all account
+     * get all accounts with page
      * @return
      */
-    public List<Account> searchAccountInfo(String accountId) {
+    public PageInfo<Account> searchAccountPageInfo(String accountId, int page, int limit) {
+        PageHelper.startPage(page, limit);
+        return new PageInfo<>(accountMapper.searchAccountInfo(accountId));
+    }
+
+    /**
+     * get all accounts without page
+     * @param accountId
+     * @return
+     */
+    public List<Account> searchAccountInfo(String accountId){
         return accountMapper.searchAccountInfo(accountId);
     }
 
@@ -78,5 +90,14 @@ public class AccountService {
      */
     public void updateAccount(Account account) {
         accountMapper.updateAccount(account);
+    }
+
+    /**
+     * update account path
+     * @param accountId
+     * @param filename
+     */
+    public void updateAccountPath(String accountId, String filename) {
+        accountMapper.updateAccountPath(accountId, filename);
     }
 }

@@ -17,6 +17,8 @@ import java.util.List;
 public class AccountListResponse extends AbstractResponse {
     protected List<Account> accounts;
 
+    long total;
+
     public void setAccountList(List<Account> accounts){
         this.setAccounts(accounts);
     }

@@ -4,11 +4,9 @@ import cn.shenghui.tutorial.dao.model.Account;
 import cn.shenghui.tutorial.rest.request.CreateAccountRequest;
 import cn.shenghui.tutorial.rest.request.PayRequest;
 import cn.shenghui.tutorial.rest.request.UpdateAccountRequest;
-import cn.shenghui.tutorial.rest.response.AccountResponse;
-import cn.shenghui.tutorial.rest.response.AccountListResponse;
-import cn.shenghui.tutorial.rest.response.CreateAccountResponse;
-import cn.shenghui.tutorial.rest.response.BasicAccountResponse;
+import cn.shenghui.tutorial.rest.response.*;
 import cn.shenghui.tutorial.service.AccountService;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.List;
 
 /**
- * @version 1.0
  * @author shenghui
+ * @version 1.0
  * @since 2019/7/26 14:17
  * account controller/uri
  */
@@ -38,29 +39,38 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @ApiOperation(value = "get account list")
+    // get account list
     @RequestMapping("/list")
-    public ModelAndView getAccountList(){
+    public ModelAndView getAccountList() {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("account");
         return mv;
     }
 
-    @ApiOperation(value = "add account page")
+    // add account page
     @RequestMapping("/add")
-    public ModelAndView addAccount(){
+    public ModelAndView addAccount() {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("accountAdd");
         return mv;
     }
 
-    @ApiOperation(value = "edit account page")
+    // edit account page
     @RequestMapping("/edit")
-    public ModelAndView editAccount(@RequestParam(name = "accountId") String accountId){
+    public ModelAndView editAccount(@RequestParam(name = "accountId") String accountId) {
         ModelAndView mv = new ModelAndView();
         mv.setViewName("accountEdit");
         Account account = accountService.getAccountInfo(accountId);
         mv.addObject("account", account);
+        return mv;
+    }
+
+    // upload image page
+    @RequestMapping("/upload")
+    public ModelAndView uploadPage(@RequestParam(name = "accountId") String accountId) {
+        ModelAndView mv = new ModelAndView();
+        mv.addObject("accountId", accountId);
+        mv.setViewName("upload");
         return mv;
     }
 
@@ -86,13 +96,16 @@ public class AccountController {
                     "statusCode = 2, id does not exist.")
     @RequestMapping(value = "/getAccountInfo", method = RequestMethod.GET)
     @ResponseBody
-    public AccountListResponse getAccountInfo(@RequestParam(name = "accountId") String accountId) {
+    public AccountListResponse getAccountInfo(@RequestParam(name = "accountId") String accountId,
+                                              @RequestParam(name = "page") int page,
+                                              @RequestParam(name = "limit") int limit) {
         AccountListResponse response = new AccountListResponse();
-        List<Account> accounts = accountService.searchAccountInfo(accountId);
-        if(ObjectUtils.isEmpty(accounts)) {
+        PageInfo<Account> pages = accountService.searchAccountPageInfo(accountId, page, limit);
+        if (ObjectUtils.isEmpty(pages.getList())) {
             response.setStatusInfo(0, "ID does not exist.");
-        }else{
-            response.setAccountList(accounts);
+        } else {
+            response.setAccountList(pages.getList());
+            response.setTotal(pages.getTotal());
             response.setStatusCode(1);
         }
         return response;
@@ -104,21 +117,21 @@ public class AccountController {
     @RequestMapping(value = "/pay", method = RequestMethod.POST)
     @ResponseBody
     @Transactional(rollbackFor = Exception.class)
-    public AccountResponse pay(@RequestBody PayRequest payRequest){
+    public AccountResponse pay(@RequestBody PayRequest payRequest) {
         AccountResponse response = new AccountResponse();
-        if(payRequest.getAccountId().isEmpty() || payRequest.getAmount() == 0) {
+        if (payRequest.getAccountId().isEmpty() || payRequest.getAmount() == 0) {
             response.setStatusInfo(0, "Incomplete request.");
-        }else{
+        } else {
             String accountId = payRequest.getAccountId();
             Account account = accountService.getAccountInfo(accountId);
-            if(ObjectUtils.isEmpty(account)){
+            if (ObjectUtils.isEmpty(account)) {
                 response.setStatusInfo(0, "ID does not exist.");
-            }else{
+            } else {
                 long amount = payRequest.getAmount();
                 long balance = account.getBalance();
-                if(amount > balance){
+                if (amount > balance) {
                     response.setStatusInfo(0, "Insufficient account balance.");
-                }else{
+                } else {
                     accountService.pay(accountId, amount);
                     balance = balance - amount;
                     response.setAccountId(accountId);
@@ -135,7 +148,7 @@ public class AccountController {
             "statusCode = 1, success")
     @RequestMapping(value = "/updateAccount", method = RequestMethod.POST)
     @ResponseBody
-    public BasicAccountResponse updateAccount(@RequestBody @Validated UpdateAccountRequest updateAccountRequest){
+    public BasicAccountResponse updateAccount(@RequestBody @Validated UpdateAccountRequest updateAccountRequest) {
         BasicAccountResponse response = new BasicAccountResponse();
         Account account = new Account();
         account.setAccountId(updateAccountRequest.getAccountId());
@@ -150,10 +163,106 @@ public class AccountController {
             "statusCode = 1, success")
     @RequestMapping(value = "/deleteAccount", method = RequestMethod.GET)
     @ResponseBody
-    public BasicAccountResponse deleteAccount(@RequestParam(name = "accountId") String accountId){
+    public BasicAccountResponse deleteAccount(@RequestParam(name = "accountId") String accountId) {
         BasicAccountResponse response = new BasicAccountResponse();
         accountService.deleteAccount(accountId);
         response.setStatusInfo(1, "Delete success");
         return response;
+    }
+
+    @ApiOperation(value = "upload image", notes = "statusCode = 0, failed; " +
+            "statusCode = 1, success")
+    @RequestMapping(value = "/uploadImage", method = RequestMethod.POST)
+    @ResponseBody
+    @Transactional(rollbackFor = Exception.class)
+    public BasicAccountResponse uploadImage(@RequestBody MultipartFile file, @RequestParam("id") String accountId) {
+        final String PATH = "D:/image";
+        BasicAccountResponse response = new BasicAccountResponse();
+        if (file.isEmpty()) {
+            response.setStatusInfo(0, "Please upload one image.");
+        } else {
+            String filename = accountId + "_" + file.getOriginalFilename();
+            String pathname = PATH + "/" + filename;
+            File dest = new File(pathname);
+            InputStream in = null;
+            FileOutputStream out = null;
+
+            //保存文件
+            try {
+                if (!dest.getParentFile().exists()) {
+                    dest.getParentFile().mkdirs();
+                }
+                in = file.getInputStream();
+                out = new FileOutputStream(dest);
+                byte[] b = new byte[1024];
+                int length;
+                while ((length = in.read(b)) > 0) {
+                    out.write(b, 0, length);
+                }
+                //file.transferTo(dest);
+                accountService.updateAccountPath(accountId, pathname);
+                response.setStatusInfo(1, "Upload success.");
+                out.flush();
+            } catch (Exception e) {
+                response.setStatusInfo(2, "Upload failed: " + e.getMessage());
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return response;
+    }
+
+    @ApiOperation(value = "download image", notes = "statusCode = 0, failed; " +
+            "statusCode = 1, success")
+    @RequestMapping(value = "/downloadImage")
+    public void downloadImage(@RequestParam(name = "accountId") String accountId, HttpServletResponse httpServletResponse) {
+        List<Account> list = accountService.searchAccountInfo(accountId);
+        String path = list.get(0).getPath();
+        File file = new File(path);
+        InputStream in = null;
+        OutputStream out = null;
+        if (file.exists()) {
+            try {
+                in = new FileInputStream(file);
+                out = httpServletResponse.getOutputStream();
+                byte[] b = new byte[1024];
+                int length;
+                while ((length = in.read(b)) > 0) {
+                    out.write(b, 0, length);
+                }
+                httpServletResponse.setContentType("image/jpg");
+                out.flush();
+            } catch (Exception e) {
+                e.getMessage();
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException ioe) {
+                        ioe.getMessage();
+                    }
+                }
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException ioe) {
+                        ioe.getMessage();
+                    }
+                }
+            }
+        }
     }
 }
