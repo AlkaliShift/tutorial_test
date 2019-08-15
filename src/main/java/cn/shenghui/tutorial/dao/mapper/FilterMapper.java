@@ -12,7 +12,7 @@ import org.mapstruct.Mapper;
 public interface FilterMapper {
     /**
      * goods
-     * @param good
+     * @param good good
      */
     void filter(Good good);
 }

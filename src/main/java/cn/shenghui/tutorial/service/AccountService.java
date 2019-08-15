@@ -28,8 +28,8 @@ public class AccountService {
 
     /**
      * create account id
-     * @param account
-     * @return
+     * @param account account
+     * @return account id
      */
     public String createAccount(Account account){
         String accountId = UUID.randomUUID().toString();
@@ -41,8 +41,8 @@ public class AccountService {
 
     /**
      * get account information
-     * @param accountId
-     * @return
+     * @param accountId account id
+     * @return account info
      */
     public Account getAccountInfo(String accountId){
         return accountMapper.getAccountInfo(accountId);
@@ -50,7 +50,7 @@ public class AccountService {
 
     /**
      * get all accounts with page
-     * @return
+     * @return page info
      */
     public PageInfo<Account> searchAccountPageInfo(String accountId, int page, int limit) {
         PageHelper.startPage(page, limit);
@@ -59,8 +59,8 @@ public class AccountService {
 
     /**
      * get all accounts without page
-     * @param accountId
-     * @return
+     * @param accountId account id
+     * @return account list
      */
     public List<Account> searchAccountInfo(String accountId){
         return accountMapper.searchAccountInfo(accountId);
@@ -68,9 +68,8 @@ public class AccountService {
 
     /**
      * pay
-     * @param accountId
-     * @param amount
-     * @return
+     * @param accountId account id
+     * @param amount amount
      */
     public void pay(String accountId, long amount){
         accountMapper.updateBalance(accountId, amount);
@@ -78,7 +77,7 @@ public class AccountService {
 
     /**
      * delete account
-     * @param accountId
+     * @param accountId account id
      */
     public void deleteAccount(String accountId) {
         accountMapper.deleteAccount(accountId);
@@ -86,7 +85,7 @@ public class AccountService {
 
     /**
      * update account
-     * @param account
+     * @param account account
      */
     public void updateAccount(Account account) {
         accountMapper.updateAccount(account);
@@ -94,8 +93,8 @@ public class AccountService {
 
     /**
      * update account path
-     * @param accountId
-     * @param filename
+     * @param accountId account id
+     * @param filename filename
      */
     public void updateAccountPath(String accountId, String filename) {
         accountMapper.updateAccountPath(accountId, filename);

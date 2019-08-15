@@ -10,7 +10,7 @@
     </resultMap>
 
     <insert id="createAccount" parameterType="cn.shenghui.tutorial.dao.model.Account">
-        insert into account
+        insert into account(account_id, account_name, pay_password, money)
         values (#{accountId,jdbcType=VARCHAR},
                 #{accountName,jdbcType=VARCHAR},
                 #{payPassword,jdbcType=VARCHAR},

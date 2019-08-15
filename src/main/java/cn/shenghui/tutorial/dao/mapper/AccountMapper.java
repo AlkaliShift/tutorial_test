@@ -16,48 +16,47 @@ public interface AccountMapper {
 
     /**
      * insert
-     * @param account
+     * @param account account
      */
     void createAccount(Account account);
 
     /**
      * get account information
-     * @param accountId
-     * @return
+     * @param accountId account id
+     * @return account
      */
     Account getAccountInfo(String accountId);
 
     /**
      * fuzzy search
-     * @param accountId
-     * @return
+     * @param accountId account id
+     * @return account list
      */
     List<Account> searchAccountInfo(@Param("accountId") String accountId);
 
     /**
      * update balance
-     * @param accountId
-     * @param amount
-     * @return
+     * @param accountId account id
+     * @param amount amount
      */
     void updateBalance(@Param("accountId") String accountId, @Param("amount") long amount);
 
     /**
      * delete account
-     * @param accountId
+     * @param accountId account id
      */
     void deleteAccount(@Param("accountId")String accountId);
 
     /**
      * update account
-     * @param account
+     * @param account account
      */
     void updateAccount(Account account);
 
     /**
      * update account path
-     * @param accountId
-     * @param filename
+     * @param accountId account id
+     * @param filename filename
      */
     void updateAccountPath(@Param("accountId")String accountId, @Param("filename")String filename);
 }

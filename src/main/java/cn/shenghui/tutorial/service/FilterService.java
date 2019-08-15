@@ -25,8 +25,7 @@ public class FilterService {
 
     /**
      * filter
-     *
-     * @param temp
+     * @param temp line info
      */
     @Transactional(rollbackFor = RuntimeException.class)
     public JSONObject filter(String temp) {
@@ -43,7 +42,7 @@ public class FilterService {
         }
     }
 
-    private Good parse(String temp) throws Exception {
+    private Good parse(String temp){
         Good good = new Good();
         String[] src = temp.trim().split(",");
         int length = src.length;

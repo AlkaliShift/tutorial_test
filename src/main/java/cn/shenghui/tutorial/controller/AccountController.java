@@ -7,6 +7,7 @@ import cn.shenghui.tutorial.rest.request.UpdateAccountRequest;
 import cn.shenghui.tutorial.rest.response.*;
 import cn.shenghui.tutorial.service.AccountService;
 import com.github.pagehelper.PageInfo;
+import com.wf.captcha.utils.CaptchaUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.List;
@@ -31,7 +33,7 @@ import java.util.List;
 @Controller
 @Api(tags = "Account")
 public class AccountController {
-
+    private static final String PATH = "D:/image";
     private AccountService accountService;
 
     @Autowired
@@ -39,7 +41,10 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    // get account list
+    /**
+     * get account list
+     * @return mv
+     */
     @RequestMapping("/list")
     public ModelAndView getAccountList() {
         ModelAndView mv = new ModelAndView();
@@ -47,7 +52,10 @@ public class AccountController {
         return mv;
     }
 
-    // add account page
+    /**
+     * add account page
+     * @return mv
+     */
     @RequestMapping("/add")
     public ModelAndView addAccount() {
         ModelAndView mv = new ModelAndView();
@@ -55,7 +63,11 @@ public class AccountController {
         return mv;
     }
 
-    // edit account page
+    /**
+     * edit account page
+     * @param accountId account id
+     * @return mv
+     */
     @RequestMapping("/edit")
     public ModelAndView editAccount(@RequestParam(name = "accountId") String accountId) {
         ModelAndView mv = new ModelAndView();
@@ -65,7 +77,11 @@ public class AccountController {
         return mv;
     }
 
-    // upload image page
+    /**
+     * upload image page
+     * @param accountId account id
+     * @return mv
+     */
     @RequestMapping("/upload")
     public ModelAndView uploadPage(@RequestParam(name = "accountId") String accountId) {
         ModelAndView mv = new ModelAndView();
@@ -74,19 +90,37 @@ public class AccountController {
         return mv;
     }
 
+    /**
+     * image captcha
+     * @param request HttpServletRequest
+     * @param response HttpServletResponse
+     * @throws Exception e
+     */
+    @RequestMapping("/images/captcha")
+    public void captcha(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        CaptchaUtil.out(130, 48, 5, request, response);
+    }
+
     @ApiOperation(value = "create account",
             notes = "statusCode = 1, success and return account id; statusCode = 0, failed.")
     @RequestMapping(value = "/createAccount", method = RequestMethod.POST)
     @ResponseBody
     @Transactional(rollbackFor = Exception.class)
-    public CreateAccountResponse createAccount(@RequestBody @Validated CreateAccountRequest createAccountRequest) {
+    public CreateAccountResponse createAccount(@RequestBody @Validated CreateAccountRequest createAccountRequest,
+                                               HttpServletRequest request) {
         CreateAccountResponse response = new CreateAccountResponse();
-        Account account = new Account();
-        account.setAccountName(createAccountRequest.getAccountName());
-        account.setPayPassword(createAccountRequest.getAccountPassword());
-        String accountId = accountService.createAccount(account);
-        response.setAccountId(accountId);
-        response.setStatusCode(1);
+        String captcha = createAccountRequest.getCaptcha();
+        String sessionCode = request.getSession().getAttribute("captcha").toString();
+        if (captcha == null || !sessionCode.equals(captcha.trim().toLowerCase())) {
+            response.setStatusInfo(0, "Captcha error.");
+        }else{
+            Account account = new Account();
+            account.setAccountName(createAccountRequest.getAccountName());
+            account.setPayPassword(createAccountRequest.getAccountPassword());
+            String accountId = accountService.createAccount(account);
+            response.setAccountId(accountId);
+            response.setStatusCode(1);
+        }
         return response;
     }
 
@@ -175,8 +209,7 @@ public class AccountController {
     @RequestMapping(value = "/uploadImage", method = RequestMethod.POST)
     @ResponseBody
     @Transactional(rollbackFor = Exception.class)
-    public BasicAccountResponse uploadImage(@RequestBody MultipartFile file, @RequestParam("id") String accountId) {
-        final String PATH = "D:/image";
+    public BasicAccountResponse uploadImage(@RequestParam(name = "file") MultipartFile file, @RequestParam(name = "id") String accountId) {
         BasicAccountResponse response = new BasicAccountResponse();
         if (file.isEmpty()) {
             response.setStatusInfo(0, "Please upload one image.");
@@ -192,6 +225,9 @@ public class AccountController {
                 if (!dest.getParentFile().exists()) {
                     dest.getParentFile().mkdirs();
                 }
+                if (!dest.exists()){
+                    dest.createNewFile();
+                }
                 in = file.getInputStream();
                 out = new FileOutputStream(dest);
                 byte[] b = new byte[1024];
@@ -199,7 +235,6 @@ public class AccountController {
                 while ((length = in.read(b)) > 0) {
                     out.write(b, 0, length);
                 }
-                //file.transferTo(dest);
                 accountService.updateAccountPath(accountId, pathname);
                 response.setStatusInfo(1, "Upload success.");
                 out.flush();
