@@ -14,5 +14,10 @@ public interface FilterMapper {
      * goods
      * @param good good
      */
-    void filter(Good good);
+    void addGood(Good good);
+
+    /**
+     * test
+     */
+    void addOne();
 }

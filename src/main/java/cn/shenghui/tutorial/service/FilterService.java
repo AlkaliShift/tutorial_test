@@ -3,11 +3,12 @@ package cn.shenghui.tutorial.service;
 import cn.shenghui.tutorial.dao.mapper.FilterMapper;
 import cn.shenghui.tutorial.dao.model.Good;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 /**
  * @author shenghui
@@ -25,24 +26,21 @@ public class FilterService {
 
     /**
      * filter
+     *
      * @param temp line info
      */
-    @Transactional(rollbackFor = RuntimeException.class)
-    public JSONObject filter(String temp) {
-        JSONObject response = new JSONObject();
+    @Transactional(rollbackFor = RuntimeException.class, propagation = REQUIRES_NEW)
+    public void filter(String temp) throws RuntimeException {
         try {
             Good good = parse(temp);
-            filterMapper.filter(good);
+            filterMapper.addOne();
+            filterMapper.addGood(good);
         } catch (Exception e) {
-            response.put("content", temp);
-            response.put("msg", e.getMessage());
             throw new RuntimeException(e.getMessage());
-        } finally {
-            return response;
         }
     }
 
-    private Good parse(String temp){
+    private Good parse(String temp) {
         Good good = new Good();
         String[] src = temp.trim().split(",");
         int length = src.length;

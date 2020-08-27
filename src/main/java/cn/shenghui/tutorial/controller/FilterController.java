@@ -6,14 +6,15 @@ import cn.shenghui.tutorial.service.FilterService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * @author shenghui
@@ -47,25 +48,16 @@ public class FilterController {
                 String tempString;
                 int line = 0;
                 int wrong = 0;
-                JSONObject tempJson;
                 StringBuilder errorMessages = new StringBuilder();
-                errorMessages.append("错误信息：")
-                        .append("\r\n");
+                errorMessages.append("错误信息：").append("\r\n");
                 while ((tempString = reader.readLine()) != null) {
                     line++;
-                    tempJson = filterService.filter(tempString);
-                    if (tempJson.length() != 0) {
-                        StringBuilder errorMessage = new StringBuilder();
-                        errorMessage.append("错误行号：")
-                                .append(line)
-                                .append(",行内容：")
-                                .append(tempJson.getString("content"))
-                                .append(",错误详情：");
-                        if(tempJson.length() > 1){
-                            errorMessage.append(tempJson.getString("msg"));
-                        }
-                        errorMessage.append("\r\n");
-                        errorMessages.append(errorMessage.toString());
+                    try {
+                        filterService.filter(tempString);
+                    } catch (RuntimeException e) {
+                        String errorMessage = "错误行号：" + line + ",行内容："
+                                + tempString + ",错误详情：" + e.getMessage() + "\r\n";
+                        errorMessages.append(errorMessage);
                         wrong++;
                     }
                 }
@@ -74,7 +66,6 @@ public class FilterController {
                 response.setStatusInfo(0, errorMessages + "");
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (JSONException j) {
             } finally {
                 if (reader != null) {
                     try {

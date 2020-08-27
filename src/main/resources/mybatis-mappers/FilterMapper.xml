@@ -2,8 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.shenghui.tutorial.dao.mapper.FilterMapper">
 
-    <insert id="filter" parameterType="cn.shenghui.tutorial.dao.model.Good">
+    <insert id="addGood" parameterType="cn.shenghui.tutorial.dao.model.Good">
         insert into goods values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{price,jdbcType=DECIMAL},
         #{currency,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR});
+    </insert>
+
+    <insert id="addOne" parameterType="java.lang.Integer">
+        insert into test(number) values (1);
     </insert>
 </mapper>
